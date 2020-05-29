@@ -19,6 +19,11 @@ using Food.API.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using HistoricEvents.API.Utility;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using HealthChecks.Publisher.InfluxDB.DependencyInjection;
+using HealthChecks.Publisher.InfluxDB;
+using HealthChecks.UI.Client;
 
 namespace Food.API
 {
@@ -35,6 +40,17 @@ namespace Food.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
+            services.AddHealthChecksUI(setupSettings: setup =>
+            {
+                setup.AddHealthCheckEndpoint("API", "/health");
+            });
+
+            services.AddHealthChecks()
+                .AddCheck("Foo", () => HealthCheckResult.Healthy("Foo is OK!"), tags: new[] { "foo_tag" })
+                .AddCheck("Bar", () => HealthCheckResult.Unhealthy("Bar is unhealthy!"), tags: new[] { "bar_tag" })
+                .AddCheck("Baz", () => HealthCheckResult.Healthy("Baz is OK!"), tags: new[] { "baz_tag" })
+                .AddInfluxDbPublisher(x => new InfluxDbOptions());
+
 
             services.AddCors(options =>
             {
@@ -118,6 +134,16 @@ namespace Food.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+                {
+                    //ResponseWriter = HealthCheckHelpers.WriteResponse
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+                endpoints.MapHealthChecksUI(setup =>
+                {
+                    
+                });
             });
 
             app.UseSwagger();
@@ -126,5 +152,8 @@ namespace Food.API
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
         }
+
+
+
     }
 }
