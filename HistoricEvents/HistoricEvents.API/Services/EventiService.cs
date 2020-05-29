@@ -31,10 +31,6 @@ namespace HistoricEvents.API.Services
         public List<Evento> Read()
         {
             var list = new List<Evento>();
-            var dati = JsonSerializer.Deserialize<Result>(jsonObj, new JsonSerializerOptions()
-            {
-                PropertyNameCaseInsensitive = true
-            });
             //list.Add(new Evento() { firstname = "Dale", lastname = "Bingham", title = "Mr.", middlename = "E." });
             //list.Add(new People() { firstname = "Richard", lastname = "Cranium", title = "Mr.", middlename = "B." });
             //list.Add(new People() { firstname = "Christine", lastname = "Smith", title = "Ms.", middlename = "L." });

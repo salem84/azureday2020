@@ -1,0 +1,25 @@
+﻿{
+
+  "count": "13813",
+  "events": [
+    {
+      "date": "-300",
+      "description": "Giappone: fine del Periodo Jdmon e inizio del Periodo Yayoi (inizia coltura del riso)",
+      "lang": "it",
+      "granularity": "year"
+    },
+    {
+      "date": "-300",
+      "description": "Vengono scritti gli Elementi di Euclide.",
+      "lang": "it",
+      "granularity": "year"
+    },
+    {
+      "date": "-300",
+      "description": "Il pontificato e l'augurato, sacerdozi romani, vengono aperti ai plebei.",
+      "lang": "it",
+      "granularity": "year"
+    }
+  ]
+
+}

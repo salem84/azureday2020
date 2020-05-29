@@ -25,6 +25,7 @@ using HealthChecks.Publisher.InfluxDB.DependencyInjection;
 using HealthChecks.Publisher.InfluxDB;
 using HealthChecks.UI.Client;
 using HistoricEvents.API.Data;
+using HistoricEvents.API.Utility.HealthCheck;
 
 namespace Food.API
 {
@@ -68,9 +69,10 @@ namespace Food.API
             healthChecksBuilder.AddCheck("Foo", () => HealthCheckResult.Healthy("Foo is OK!"), tags: new[] { "foo_tag" })
                 .AddCheck("Bar", () => HealthCheckResult.Unhealthy("Bar is unhealthy!"), tags: new[] { "bar_tag" })
                 .AddCheck("Baz", () => HealthCheckResult.Healthy("Baz is OK!"), tags: new[] { "baz_tag" })
+                .AddMemoryHealthCheck("memory", thresholdInBytes: 1024L * 1024L * 200L)
                 .AddInfluxDbPublisher(x => new InfluxDbOptions());
 
-            if (string.IsNullOrEmpty(connString))
+            if (!string.IsNullOrEmpty(connString))
             {
                 healthChecksBuilder.AddSqlServer(
                     connString,

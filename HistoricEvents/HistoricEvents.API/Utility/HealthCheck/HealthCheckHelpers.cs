@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace HistoricEvents.API.Utility
+namespace HistoricEvents.API.Utility.HealthCheck
 {
     public class HealthCheckHelpers
     {

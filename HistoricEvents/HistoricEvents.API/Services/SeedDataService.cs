@@ -1,6 +1,10 @@
-﻿using HistoricEvents.API.Data;
+﻿using Historic.API.Entities;
+using HistoricEvents.API.Data;
+using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace HistoricEvents.API.Services
 {
@@ -13,7 +17,13 @@ namespace HistoricEvents.API.Services
     {
         public async Task Initialize(EventsDbContext context)
         {
-            
+            var jsonObj = File.ReadAllText("Data/italian_events.json");
+            var dati = JsonConvert.DeserializeObject<Result>(jsonObj).Events;
+
+            dati.ForEach(x =>
+            {
+                context.Eventi.Add(x);
+            });
             await context.SaveChangesAsync();
         }
     }

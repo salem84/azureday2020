@@ -17,51 +17,23 @@ namespace peopleapi.Services
 
         public ConfigurationService()
         {
-            if (_cache.ContainsKey(key))
+            if (_cache.Count == 0)
             {
-                _bussolaStream = _cache[key].Value as string;
+                _cache.Add("TimerConfiguration", new CacheItem("TimerConfiguration", 10));
             }
-            else
-            {
-                _bussolaStream = CreabussolaStream();
-                _cache.Add(key, new CacheItem(key, _bussolaStream));
-            }
+           
 
 
-            if (!string.IsNullOrEmpty(_bussolaStream))
-            {
-                //
-                // Recupera dalla string di output tutto ciò che è contenuto tra i tag <head></head>
-                //
-                int startIndex = _bussolaStream.IndexOf("<head>") + 6;
-
-                int endIndex = _bussolaStream.IndexOf("</head>");
-
-                this.Header = _bussolaStream.Substring(startIndex, endIndex - startIndex);
-
-                //
-                // Recupera dalla string di output tutto ciò che è contenuto tra i tag <body><div id="mainDiv">
-                //
-                startIndex = _bussolaStream.IndexOf("<body>") + 6;
-
-                endIndex = _bussolaStream.IndexOf("</footer>");
-
-                this.Body = _bussolaStream.Substring(startIndex, endIndex - startIndex);
-            }
+           
         }
 
-        private string CreabussolaStream()
+        public CacheItem Get(string key)
         {
-            string bussola = string.Empty;
-            try
+            if (_cache.ContainsKey(key))
             {
-                return File.ReadAllText("page.html");
+                return _cache[key];
             }
-            catch (Exception ex)
-            {
-                // ignored
-            }
-            return bussola;
+            return null;
         }
     }
 

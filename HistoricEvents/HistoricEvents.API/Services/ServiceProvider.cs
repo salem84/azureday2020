@@ -34,7 +34,7 @@ namespace Historic.API.Services
                 List<object> servizi = new List<object>();
                 _istanzaEventiService = GetInstance<IEventiService>(servizi);
 
-                int sleep = (int)(configuration.GetValue<decimal>("TimerConfigurationMinutes") * 60 * 1000);
+                int sleep = (int)(configuration.GetValue<decimal>("TimerConfigurationSeconds") * 1000);
                 _timer = new Timer(sleep);
                 _timer.Elapsed += _timer_Elapsed;
                 _timer.Start();

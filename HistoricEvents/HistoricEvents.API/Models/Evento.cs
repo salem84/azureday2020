@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace Historic.API.Entities
 {
@@ -13,6 +15,11 @@ namespace Historic.API.Entities
     public class Result
     {
         public long Count { get; set; }
-        public Evento[] Events { get; set; }
+        public List<Evento> Events { get; set; }
+    }
+
+    public class JsonData
+    {
+        public Result Result { get; set; }
     }
 }
