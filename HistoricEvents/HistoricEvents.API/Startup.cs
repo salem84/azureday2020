@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.Publisher.InfluxDB.DependencyInjection;
 using HealthChecks.Publisher.InfluxDB;
 using HealthChecks.UI.Client;
+using HistoricEvents.API.Data;
 
 namespace Food.API
 {
@@ -39,18 +40,44 @@ namespace Food.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var connString = Configuration.GetConnectionString("EventsDatabaseConnString");
+
             services.AddOptions();
+
+            services.AddDbContext<EventsDbContext>(opt =>
+            {
+                if (string.IsNullOrEmpty(connString))
+                {
+                    opt.UseInMemoryDatabase("EventsDatabase");
+                }
+                else
+                {
+                    opt.UseSqlServer(connString);
+                }
+            });
+
+            #region HEALTHCHECKS
+
             services.AddHealthChecksUI(setupSettings: setup =>
             {
                 setup.AddHealthCheckEndpoint("API", "/health");
             });
 
-            services.AddHealthChecks()
-                .AddCheck("Foo", () => HealthCheckResult.Healthy("Foo is OK!"), tags: new[] { "foo_tag" })
+            var healthChecksBuilder = services.AddHealthChecks();
+
+            healthChecksBuilder.AddCheck("Foo", () => HealthCheckResult.Healthy("Foo is OK!"), tags: new[] { "foo_tag" })
                 .AddCheck("Bar", () => HealthCheckResult.Unhealthy("Bar is unhealthy!"), tags: new[] { "bar_tag" })
                 .AddCheck("Baz", () => HealthCheckResult.Healthy("Baz is OK!"), tags: new[] { "baz_tag" })
                 .AddInfluxDbPublisher(x => new InfluxDbOptions());
 
+            if (string.IsNullOrEmpty(connString))
+            {
+                healthChecksBuilder.AddSqlServer(
+                    connString,
+                    name: "EventsDB-check");
+            }
+
+            #endregion
 
             services.AddCors(options =>
             {

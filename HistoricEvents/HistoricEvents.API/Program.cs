@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore;
+﻿using HistoricEvents.API.Data;
+using HistoricEvents.API.Services;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +15,24 @@ namespace Food.API
         public static void Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
+
+            // Initializes db.
+            using (var scope = host.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<EventsDbContext>();
+                    context.Database.EnsureCreated();
+                    var dbInitializer = services.GetRequiredService<ISeedDataService>();
+                    dbInitializer.Initialize(context).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding the database.");
+                }
+            }
 
             host.Run();
         }
