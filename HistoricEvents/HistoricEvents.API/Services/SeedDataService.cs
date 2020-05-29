@@ -17,6 +17,11 @@ namespace HistoricEvents.API.Services
     {
         public async Task Initialize(EventsDbContext context)
         {
+            if(context.Eventi.Any())
+            {
+                return;
+            }
+
             var jsonObj = File.ReadAllText("Data/italian_events.json");
             var dati = JsonConvert.DeserializeObject<Result>(jsonObj).Events;
 

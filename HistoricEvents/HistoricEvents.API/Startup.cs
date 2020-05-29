@@ -26,6 +26,8 @@ using HealthChecks.Publisher.InfluxDB;
 using HealthChecks.UI.Client;
 using HistoricEvents.API.Data;
 using HistoricEvents.API.Utility.HealthCheck;
+using HistoricEvents.API.Services;
+using HistoricEvents.API;
 
 namespace Food.API
 {
@@ -41,19 +43,19 @@ namespace Food.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var connString = Configuration.GetConnectionString("EventsDatabaseConnString");
+            var connStringSqlite = Configuration.GetConnectionString(Constants.ConnectionStringNameSqlite);
 
             services.AddOptions();
 
             services.AddDbContext<EventsDbContext>(opt =>
             {
-                if (string.IsNullOrEmpty(connString))
+                if (string.IsNullOrEmpty(connStringSqlite))
                 {
                     opt.UseInMemoryDatabase("EventsDatabase");
                 }
                 else
                 {
-                    opt.UseSqlServer(connString);
+                    opt.UseSqlite(connStringSqlite);
                 }
             });
 
@@ -66,16 +68,17 @@ namespace Food.API
 
             var healthChecksBuilder = services.AddHealthChecks();
 
-            healthChecksBuilder.AddCheck("Foo", () => HealthCheckResult.Healthy("Foo is OK!"), tags: new[] { "foo_tag" })
-                .AddCheck("Bar", () => HealthCheckResult.Unhealthy("Bar is unhealthy!"), tags: new[] { "bar_tag" })
+            healthChecksBuilder
+                .AddCheck("Foo", () => HealthCheckResult.Healthy("Foo is OK!"), tags: new[] { "foo_tag" })
+                //.AddCheck("Bar", () => HealthCheckResult.Unhealthy("Bar is unhealthy!"), tags: new[] { "bar_tag" })
                 .AddCheck("Baz", () => HealthCheckResult.Healthy("Baz is OK!"), tags: new[] { "baz_tag" })
                 .AddMemoryHealthCheck("memory", thresholdInBytes: 1024L * 1024L * 200L)
                 .AddInfluxDbPublisher(x => new InfluxDbOptions());
 
-            if (!string.IsNullOrEmpty(connString))
+            if (!string.IsNullOrEmpty(connStringSqlite))
             {
-                healthChecksBuilder.AddSqlServer(
-                    connString,
+                healthChecksBuilder.AddSqlite(
+                    connStringSqlite,
                     name: "EventsDB-check");
             }
 
@@ -122,6 +125,7 @@ namespace Food.API
 
             services.AddTransient<ErrorSimulatorFilter>();
             services.AddTransient<DelaySimulatorFilter>();
+            services.AddSingleton<ISeedDataService, SeedDataService>();
 
         }
 
