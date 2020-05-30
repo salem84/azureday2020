@@ -23,11 +23,11 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using HealthChecks.Publisher.InfluxDB.DependencyInjection;
 using HealthChecks.Publisher.InfluxDB;
-using HealthChecks.UI.Client;
 using HistoricEvents.API.Data;
 using HistoricEvents.API.Utility.HealthCheck;
 using HistoricEvents.API.Services;
 using HistoricEvents.API;
+using HealthChecks.UI.Client;
 
 namespace Food.API
 {
@@ -64,7 +64,7 @@ namespace Food.API
             services.AddHealthChecksUI(setupSettings: setup =>
             {
                 setup.AddHealthCheckEndpoint("API", "/health");
-            });
+            }).AddInMemoryStorage();
 
             var healthChecksBuilder = services.AddHealthChecks();
 
