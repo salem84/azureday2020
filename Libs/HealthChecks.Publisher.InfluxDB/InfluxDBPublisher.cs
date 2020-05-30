@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -10,19 +12,19 @@ namespace HealthChecks.Publisher.InfluxDB
 {
     public class InfluxDBPublisher : IHealthCheckPublisher
     {
-        private const string HealthCheckUrl = "http://localhost:52494/hc";
-        private const string InfluxdbWriteUrl = "http://grafanagio4rh5tuqwifp7k.northeurope.cloudapp.azure.com:8086/write?db=myk6db";
-        private const string WebHostName = "gpf1";
 
         private readonly Func<HttpClient> _httpClientFactory;
+        private readonly InfluxDbOptions _options;
 
         public InfluxDBPublisher(Func<HttpClient> httpClientFactory, InfluxDbOptions options)
         {
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+            _options = options;
         }
 
         public async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
+            var metrics = new List<MetricInfluxDB>();
             foreach (var keyedEntry in report.Entries)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -32,15 +34,37 @@ namespace HealthChecks.Publisher.InfluxDB
                 var entry = keyedEntry.Value;
 
                 int status = ConvertStatus(entry.Status);
-                var metric = new MetricInfluxDB()
+                
+                if(entry.Data.Any())
                 {
-                    HostName = Environment.MachineName,
-                    Service = key,
-                    Status = status
-                };
+                    foreach (var data in entry.Data)
+                    {
+                        var value = Convert.ToDecimal(data.Value);
+                        
+                        metrics.Add(new MetricInfluxDB()
+                        {
+                            HostName = Environment.MachineName,
+                            Measurement = key,
+                            Service = data.Key,
+                            Value = value
+                        });
+                    }
+                }
+                else
+                {
+                    metrics.Add(new MetricInfluxDB()
+                    {
+                        HostName = Environment.MachineName,
+                        Measurement = key,
+                        Value = status
+                    });
+                }
+                
 
-                await PushMetrics(metric);
             }
+
+            await PushMetrics(metrics);
+
         }
 
         private static int ConvertStatus(HealthStatus healthStatus)
@@ -63,22 +87,48 @@ namespace HealthChecks.Publisher.InfluxDB
             return status;
         }
 
-        private async Task PushMetrics(MetricInfluxDB metric)
+        //private async Task PushMetrics(MetricInfluxDB metric)
+        //{
+        //    try
+        //    {
+        //        var httpClient = _httpClientFactory();
+
+        //        var pushMessage = new HttpRequestMessage(HttpMethod.Post, $"{InfluxdbWriteUrl}");
+        //        var body = $"health,host={metric.HostName},service={metric.Service} value={metric.Status}";
+
+        //        using (var stringContent = new StringContent(body, Encoding.UTF8))
+        //        {
+        //            pushMessage.Content = stringContent;
+        //            (await httpClient.SendAsync(pushMessage))
+        //                .EnsureSuccessStatusCode();
+        //        }
+                   
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Trace.WriteLine($"Exception is throwed publishing metrics with message: {ex.Message}");
+        //    }
+        //}
+
+        private async Task PushMetrics(IEnumerable<MetricInfluxDB> metrics)
         {
             try
             {
                 var httpClient = _httpClientFactory();
 
-                var pushMessage = new HttpRequestMessage(HttpMethod.Post, $"{InfluxdbWriteUrl}");
-                var body = $"health,host={metric.HostName},service={metric.Service} value={metric.Status}";
-
-                using (var stringContent = new StringContent(body, Encoding.UTF8))
+                foreach (var metric in metrics)
                 {
-                    pushMessage.Content = stringContent;
-                    (await httpClient.SendAsync(pushMessage))
-                        .EnsureSuccessStatusCode();
+                    var pushMessage = new HttpRequestMessage(HttpMethod.Post, $"{_options.WriteApiUrl}?db={_options.DatabaseName}");
+                    
+                    var body = $"{metric.Measurement},host={metric.HostName},service={metric.Service} value={metric.Value}";
+
+                    using (var stringContent = new StringContent(body, Encoding.UTF8))
+                    {
+                        pushMessage.Content = stringContent;
+                        (await httpClient.SendAsync(pushMessage))
+                            .EnsureSuccessStatusCode();
+                    }
                 }
-                   
             }
             catch (Exception ex)
             {
@@ -89,8 +139,9 @@ namespace HealthChecks.Publisher.InfluxDB
         class MetricInfluxDB
         {
             public string HostName { get; set; }
+            public string Measurement { get; set; }
             public string Service { get; set; }
-            public int Status { get; set; }
+            public decimal Value { get; set; }
         }
     }
 }

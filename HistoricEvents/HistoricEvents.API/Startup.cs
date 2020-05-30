@@ -73,7 +73,11 @@ namespace Food.API
                 //.AddCheck("Bar", () => HealthCheckResult.Unhealthy("Bar is unhealthy!"), tags: new[] { "bar_tag" })
                 .AddCheck("Baz", () => HealthCheckResult.Healthy("Baz is OK!"), tags: new[] { "baz_tag" })
                 .AddMemoryHealthCheck("memory", thresholdInBytes: 1024L * 1024L * 200L)
-                .AddInfluxDbPublisher(x => new InfluxDbOptions());
+                .AddInfluxDbPublisher(x =>
+                {
+                    x.WriteApiUrl = Configuration.GetSection("InfluxDb:WriteApiUrl").Value;
+                    x.DatabaseName = Configuration.GetSection("InfluxDb:DatabaseName").Value;
+                });
 
             if (!string.IsNullOrEmpty(connStringSqlite))
             {
