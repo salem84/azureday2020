@@ -44,7 +44,6 @@ namespace HealthChecks.Publisher.InfluxDB
                         metrics.Add(new MetricInfluxDB()
                         {
                             HostName = Environment.MachineName,
-                            Measurement = key,
                             Service = data.Key,
                             Value = value
                         });
@@ -55,7 +54,7 @@ namespace HealthChecks.Publisher.InfluxDB
                     metrics.Add(new MetricInfluxDB()
                     {
                         HostName = Environment.MachineName,
-                        Measurement = key,
+                        Service = key,
                         Value = status
                     });
                 }
@@ -120,7 +119,7 @@ namespace HealthChecks.Publisher.InfluxDB
                 {
                     var pushMessage = new HttpRequestMessage(HttpMethod.Post, $"{_options.WriteApiUrl}?db={_options.DatabaseName}");
                     
-                    var body = $"{metric.Measurement},host={metric.HostName},service={metric.Service} value={metric.Value}";
+                    var body = $"health,host={metric.HostName},service={metric.Service} value={metric.Value}";
 
                     using (var stringContent = new StringContent(body, Encoding.UTF8))
                     {
@@ -139,9 +138,29 @@ namespace HealthChecks.Publisher.InfluxDB
         class MetricInfluxDB
         {
             public string HostName { get; set; }
-            public string Measurement { get; set; }
             public string Service { get; set; }
             public decimal Value { get; set; }
         }
+
+
+        //private string ConvertToInfluxDbFormat(MetricInfluxDB metric)
+        //{
+        //    var sb = new StringBuilder(metric.Measurement).Append(",");
+
+        //    foreach (var p in metric.Properties)
+        //    {
+        //        sb.Append(p.Key).Append("=").Append(p.Value);
+        //    }
+
+        //    sb.Append(" value=").Append(metric.Value);
+        //    return sb.ToString();
+        //}
+
+        //class MetricInfluxDB
+        //{
+        //    public string Measurement { get; set; }
+        //    public decimal Value { get; set; }
+        //    public Dictionary<string, decimal> Properties { get; set; }
+        //}
     }
 }
