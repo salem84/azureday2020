@@ -119,7 +119,7 @@ namespace HealthChecks.Publisher.InfluxDB
                 {
                     var pushMessage = new HttpRequestMessage(HttpMethod.Post, $"{_options.WriteApiUrl}?db={_options.DatabaseName}");
                     
-                    var body = $"health,host={metric.HostName},service={metric.Service} value={metric.Value}";
+                    var body = $"{metric.Service},host={metric.HostName} value={metric.Value}";
 
                     using (var stringContent = new StringContent(body, Encoding.UTF8))
                     {
