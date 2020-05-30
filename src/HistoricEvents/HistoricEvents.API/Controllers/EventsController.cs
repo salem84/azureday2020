@@ -1,10 +1,13 @@
 ﻿using Historic.API.Entities;
 using Historic.API.Services;
+using HistoricEvents.API.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using peopleapi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 
 namespace HistoricEvents.API.Controllers
@@ -13,6 +16,12 @@ namespace HistoricEvents.API.Controllers
     [Route("api/[controller]")]
     public class EventsController : ControllerBase
     {
+        private readonly EventsDbContext _context;
+
+        public EventsController(EventsDbContext context)
+        {
+            _context = context;
+        }
         /// <summary>
         /// GET The list of events
         /// </summary>
@@ -21,11 +30,21 @@ namespace HistoricEvents.API.Controllers
         /// </returns>
         /// <response code="200">Returns the list of events records</response>
         [HttpGet]
-        public ActionResult<IEnumerable<Evento>> Get()
+        public async Task<ActionResult<IEnumerable<Evento>>> Get()
         {
-            var list = new List<Evento>();
 
-            list = ServiceProvider.EventiService.Read();
+            var listWrong = ServiceProvider.EventiService.Read();
+
+            var total = _context.Eventi.Count();
+            var num = new Random().Next(0, 10);
+
+            var list = new List<Evento>();
+            for (int i = 0; i < num; i++)
+            {
+                var index = new Random().Next(0, total - 1);
+                var el = await _context.Eventi.SingleAsync(x => x.Id == index);
+                list.Add(el);
+            }
 
             return Ok(list);
         }
@@ -38,7 +57,7 @@ namespace HistoricEvents.API.Controllers
         /// </returns>
         /// <response code="200">Returns the event record</response>
         [HttpGet("{id}")]
-        public ActionResult<Evento> Get(string id)
+        public async Task<ActionResult<Evento>> Get(string id)
         {
             var p = new Evento();
            

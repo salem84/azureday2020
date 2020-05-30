@@ -19,6 +19,15 @@ using Food.API.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using HistoricEvents.API.Utility;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using HealthChecks.Publisher.InfluxDB.DependencyInjection;
+using HealthChecks.Publisher.InfluxDB;
+using HealthChecks.UI.Client;
+using HistoricEvents.API.Data;
+using HistoricEvents.API.Utility.HealthCheck;
+using HistoricEvents.API.Services;
+using HistoricEvents.API;
 
 namespace Food.API
 {
@@ -34,7 +43,50 @@ namespace Food.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var connStringSqlite = Configuration.GetConnectionString(Constants.ConnectionStringNameSqlite);
+
             services.AddOptions();
+
+            services.AddDbContext<EventsDbContext>(opt =>
+            {
+                if (string.IsNullOrEmpty(connStringSqlite))
+                {
+                    opt.UseInMemoryDatabase("EventsDatabase");
+                }
+                else
+                {
+                    opt.UseSqlite(connStringSqlite);
+                }
+            });
+
+            #region HEALTHCHECKS
+
+            services.AddHealthChecksUI(setupSettings: setup =>
+            {
+                setup.AddHealthCheckEndpoint("API", "/health");
+            });
+
+            var healthChecksBuilder = services.AddHealthChecks();
+
+            healthChecksBuilder
+                .AddCheck("Foo", () => HealthCheckResult.Healthy("Foo is OK!"), tags: new[] { "foo_tag" })
+                //.AddCheck("Bar", () => HealthCheckResult.Unhealthy("Bar is unhealthy!"), tags: new[] { "bar_tag" })
+                .AddCheck("Baz", () => HealthCheckResult.Healthy("Baz is OK!"), tags: new[] { "baz_tag" })
+                .AddMemoryHealthCheck("memory", thresholdInBytes: 1024L * 1024L * 200L)
+                .AddInfluxDbPublisher(x =>
+                {
+                    x.WriteApiUrl = Configuration.GetSection("InfluxDb:WriteApiUrl").Value;
+                    x.DatabaseName = Configuration.GetSection("InfluxDb:DatabaseName").Value;
+                });
+
+            if (!string.IsNullOrEmpty(connStringSqlite))
+            {
+                healthChecksBuilder.AddSqlite(
+                    connStringSqlite,
+                    name: "EventsDB-check");
+            }
+
+            #endregion
 
             services.AddCors(options =>
             {
@@ -77,6 +129,7 @@ namespace Food.API
 
             services.AddTransient<ErrorSimulatorFilter>();
             services.AddTransient<DelaySimulatorFilter>();
+            services.AddSingleton<ISeedDataService, SeedDataService>();
 
         }
 
@@ -118,6 +171,16 @@ namespace Food.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+                {
+                    //ResponseWriter = HealthCheckHelpers.WriteResponse
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+                endpoints.MapHealthChecksUI(setup =>
+                {
+                    
+                });
             });
 
             app.UseSwagger();
@@ -126,5 +189,8 @@ namespace Food.API
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
         }
+
+
+
     }
 }
