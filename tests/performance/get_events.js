@@ -5,18 +5,18 @@ import { Counter, Rate, Trend } from "k6/metrics";
 
 // Options
 export let options = {
-    // stages: [
-    //     { target: 100, duration: "30s" },
-    //     { target: 100, duration: "120s" },
-    //     { target: 120, duration: "60s" },
-    //     { target: 0, duration: "30s" }
-    // ],
     stages: [
-        { target: 100, duration: "3s" },
-        { target: 100, duration: "12s" },
-        { target: 120, duration: "6s" },
-        { target: 0, duration: "3s" }
+        { target: 100, duration: "30s" },
+        { target: 80, duration: "60s" },
+        { target: 120, duration: "90s" },
+        { target: 0, duration: "30s" }
     ],
+    // stages: [
+    //     { target: 100, duration: "3s" },
+    //     { target: 80, duration: "12s" },
+    //     { target: 120, duration: "6s" },
+    //     { target: 0, duration: "3s" }
+    // ],
     thresholds: {
         "http_req_duration": ["p(95)<500"],
         "http_req_duration": ["p(99)<10"],
@@ -32,7 +32,7 @@ var timeToFirstByte = new Trend("time_to_first_byte", true);
 
 // User scenario
 export default function() {
-    group("Get Food", function() {
+    group("Get Events", function() {
         let res = http.get("https://historicevents.azurewebsites.net/api/events");
 
         let checkRes = check(res, {
