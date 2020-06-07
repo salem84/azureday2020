@@ -35,7 +35,7 @@ export default function() {
     group("Get Food", function() {
         let res = http.get("https://historicevents.azurewebsites.net/api/events");
 
-        check(res, {
+        let checkRes = check(res, {
             "is status 200": (r) => r.status === 200,
             "body is greater than 1KB": (r) => r.body.length > 1024,
         });
