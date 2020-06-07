@@ -16,6 +16,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.1.1-preview6" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="3.1.1-preview3" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" Version="3.1.1-preview3" />
+    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="3.1.1" />
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.1.1" />

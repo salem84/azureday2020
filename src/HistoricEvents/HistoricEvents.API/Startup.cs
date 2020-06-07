@@ -28,6 +28,7 @@ using HistoricEvents.API.Utility.HealthCheck;
 using HistoricEvents.API.Services;
 using HistoricEvents.API;
 using HealthChecks.UI.Client;
+using System;
 
 namespace Food.API
 {
@@ -69,9 +70,10 @@ namespace Food.API
             var healthChecksBuilder = services.AddHealthChecks();
 
             healthChecksBuilder
-                .AddCheck("Foo", () => HealthCheckResult.Healthy("Foo is OK!"), tags: new[] { "foo_tag" })
-                //.AddCheck("Bar", () => HealthCheckResult.Unhealthy("Bar is unhealthy!"), tags: new[] { "bar_tag" })
-                .AddCheck("Baz", () => HealthCheckResult.Healthy("Baz is OK!"), tags: new[] { "baz_tag" })
+                .AddUrlGroup(new Uri($"{Configuration.GetValue<string>("BaseUrl")}/api/Events"),
+                        name: "Base URL",
+                        failureStatus: HealthStatus.Degraded)
+                .AddCheck("CustomCheck", () => HealthCheckResult.Healthy("CustomCheck is OK!"), tags: new[] { "custom_tag" })
                 .AddMemoryHealthCheck("memory", thresholdInBytes: 1024L * 1024L * 200L)
                 .AddInfluxDbPublisher(x =>
                 {
@@ -83,7 +85,7 @@ namespace Food.API
             {
                 healthChecksBuilder.AddSqlite(
                     connStringSqlite,
-                    name: "EventsDB-check");
+                    name: "EventsDB-check", tags: new[] { "database" });
             }
 
             #endregion
