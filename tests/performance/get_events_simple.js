@@ -6,14 +6,13 @@ import { Counter, Rate, Trend } from "k6/metrics";
 // Options
 export let options = {
     stages: [
-        { target: 10, duration: "3s" },
-        { target: 8, duration: "12s" },
-        { target: 12, duration: "6s" },
-        { target: 0, duration: "3s" }
+        { target: 10, duration: "5s" },
+        { target: 8, duration: "15s" },
+        { target: 12, duration: "10s" },
+        { target: 0, duration: "5s" }
     ],
     thresholds: {
         "http_req_duration": ["p(95)<500"],
-        "http_req_duration": ["p(99)<10"],
         "check_failure_rate": ["rate<0.3"]
     }
 };
