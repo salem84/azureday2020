@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Food.API.Filters
+namespace API.Filters
 {
 
     public class ErrorSimulatorFilter : IActionFilter

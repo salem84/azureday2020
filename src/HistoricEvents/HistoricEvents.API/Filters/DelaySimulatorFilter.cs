@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Food.API.Filters
+namespace API.Filters
 {
     public class DelaySimulatorFilter : IActionFilter
     {

@@ -1,4 +1,5 @@
-﻿using Historic.API.Entities;
+﻿using API.Filters;
+using Historic.API.Entities;
 using Historic.API.Services;
 using HistoricEvents.API.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,7 @@ namespace HistoricEvents.API.Controllers
         /// </returns>
         /// <response code="200">Returns the list of events records</response>
         [HttpGet]
+        [ServiceFilter(typeof(ErrorSimulatorFilter))]
         public async Task<ActionResult<IEnumerable<Evento>>> Get()
         {
 
