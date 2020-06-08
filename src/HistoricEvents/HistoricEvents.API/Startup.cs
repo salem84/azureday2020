@@ -66,7 +66,7 @@ namespace Food.API
 
             healthChecksBuilder
                 .AddUrlGroup(new Uri($"{Configuration.GetValue<string>("BaseUrl")}/api/Events"),
-                        name: "Base URL",
+                        name: "BaseURL",
                         failureStatus: HealthStatus.Degraded)
                 .AddCheck("CustomCheck", () => HealthCheckResult.Healthy("CustomCheck is OK!"), tags: new[] { "custom_tag" })
                 .AddMemoryHealthCheck("memory", thresholdInBytes: 1024L * 1024L * 200L)
