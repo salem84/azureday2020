@@ -15,7 +15,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
-using Food.API.Filters;
+using API.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using HistoricEvents.API.Utility;
 using Microsoft.OpenApi.Models;
