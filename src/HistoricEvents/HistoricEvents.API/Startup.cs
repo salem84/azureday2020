@@ -178,12 +178,12 @@ namespace Food.API
                     //ResponseWriter = HealthCheckHelpers.WriteResponse
                     Predicate = _ => true,
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
-                    ResultStatusCodes =
-                    {
-                        [HealthStatus.Healthy] = StatusCodes.Status200OK,
-                        [HealthStatus.Degraded] = StatusCodes.Status503ServiceUnavailable,
-                        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
-                    }
+                    //ResultStatusCodes =
+                    //{
+                    //    [HealthStatus.Healthy] = StatusCodes.Status200OK,
+                    //    [HealthStatus.Degraded] = StatusCodes.Status503ServiceUnavailable,
+                    //    [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable
+                    //}
                 });
                 endpoints.MapHealthChecksUI(setup =>
                 {
