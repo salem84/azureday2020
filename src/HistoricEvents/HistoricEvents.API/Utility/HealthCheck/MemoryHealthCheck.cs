@@ -63,7 +63,7 @@ namespace HistoricEvents.API.Utility.HealthCheck
         {
             // Register a check of type GCInfo.
             builder.AddCheck<MemoryHealthCheck>(
-                name, failureStatus ?? HealthStatus.Degraded, tags);
+                name, failureStatus ?? HealthStatus.Unhealthy, tags);
 
             // Configure named options to pass the threshold into the check.
             if (thresholdInBytes.HasValue)
