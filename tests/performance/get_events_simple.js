@@ -6,9 +6,9 @@ import { Counter, Rate, Trend } from "k6/metrics";
 // Options
 export let options = {
     stages: [
-        { target: 10, duration: "10s" },
-        { target: 20, duration: "15s" },
-        { target: 30, duration: "10s" },
+        { target: 10, duration: "15s" },
+        { target: 20, duration: "20s" },
+        { target: 30, duration: "15s" },
         { target: 0, duration: "10s" }
     ],
     thresholds: {
