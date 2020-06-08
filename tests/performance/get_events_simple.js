@@ -6,10 +6,10 @@ import { Counter, Rate, Trend } from "k6/metrics";
 // Options
 export let options = {
     stages: [
-        { target: 10, duration: "5s" },
-        { target: 8, duration: "15s" },
-        { target: 12, duration: "10s" },
-        { target: 0, duration: "5s" }
+        { target: 10, duration: "10s" },
+        { target: 20, duration: "15s" },
+        { target: 30, duration: "10s" },
+        { target: 0, duration: "10s" }
     ],
     thresholds: {
         "http_req_duration": ["p(95)<500"],
@@ -38,6 +38,6 @@ export default function() {
         // Record time to first byte and tag it with the URL 
         timeToFirstByte.add(res.timings.waiting, { url: res.url });
 
-        sleep(5);
+        sleep(1);
     });
 }
