@@ -20,7 +20,6 @@ export let options = {
     thresholds: {
         "http_req_duration": ["p(95)<500"],
         "http_req_duration": ["p(99)<10"],
-        "http_req_duration{staticAsset:yes}": ["p(95)<100"],
         "check_failure_rate": ["rate<0.3"]
     }
 };
@@ -37,7 +36,7 @@ export default function() {
 
         let checkRes = check(res, {
             "is status 200": (r) => r.status === 200,
-            "body is greater than 1KB": (r) => r.body.length > 1024,
+            "body is greater than 200 bytes": (r) => r.body.length > 200,
         });
 
         // Record check failures
