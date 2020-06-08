@@ -62,11 +62,6 @@ namespace Food.API
 
             #region HEALTHCHECKS
 
-            services.AddHealthChecksUI(setupSettings: setup =>
-            {
-                setup.AddHealthCheckEndpoint("API", "/health");
-            }).AddInMemoryStorage();
-
             var healthChecksBuilder = services.AddHealthChecks();
 
             healthChecksBuilder
@@ -87,6 +82,11 @@ namespace Food.API
                     connStringSqlite,
                     name: "EventsDB-check", tags: new[] { "database" });
             }
+
+            services.AddHealthChecksUI(setupSettings: setup =>
+            {
+                setup.AddHealthCheckEndpoint("API", "/health");
+            }).AddInMemoryStorage();
 
             #endregion
 
